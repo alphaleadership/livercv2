@@ -19,8 +19,7 @@
     10. Compiler avec tous les avertissements actifs et les corriger tous avant publication.
 - **Langue** : Toujours communiquer en français avec l'utilisateur.
 - **Prepush Hook** : Avant chaque `push`, s'assurer que la version dans `package.json` est incrémentée et que les tests/stabilité sont vérifiés.
-- **Localisation** : Si aucune coordonnée n'est précisée, utiliser la première ville mentionnée comme point de repère.
-- **Workflow** : Proposer proactivement la création d'une pull request après des modifications de code.
+
 
 ### Plan d'implémentation
 Les tâches détaillées se trouvent dans `.kiro/specs/wikipedia-patrol-tool/tasks.md`.

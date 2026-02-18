@@ -12,6 +12,7 @@ This implementation plan breaks down the Wikipedia Patrol Tool into discrete, ma
   - Configure testing framework (Jest + fast-check for property-based testing)
   - Create base HTML template with golden-layout integration
   - Set up OAuth configuration for MediaWiki authentication
+  - Prepare for hosting on WikiMedia Cloud Services (Toolforge)
   - _Requirements: 9.1, 9.5_
 
 - [ ] 2. Implement core API client and authentication
@@ -38,6 +39,7 @@ This implementation plan breaks down the Wikipedia Patrol Tool into discrete, ma
   - [ ] 3.1 Create EventStream connection manager
     - Implement WebSocket connection to MediaWiki EventStream
     - Add connection state management (connect, disconnect, pause, resume)
+    - Implement auto-scroll interruption when scrolling down
     - Support multiple wiki monitoring simultaneously
     - _Requirements: 1.1, 1.2, 1.5_
   
@@ -78,9 +80,10 @@ This implementation plan breaks down the Wikipedia Patrol Tool into discrete, ma
 
 - [ ] 6. Build recent changes list component
   - [ ] 6.1 Create changes list UI component
-    - Implement change display with all required information fields
-    - Add interactive selection and click handling
+    - Implement change display with large click area (click anywhere to open diff)
+    - Add session-specific data: user revert count in session, recent warnings detection
     - Support change status management (reviewed, hidden)
+    - Add "Clear List" and "Back" (history) navigation buttons
     - _Requirements: 2.5, 2.6, 6.2_
   
   - [ ]* 6.2 Write property test for change information display
@@ -98,8 +101,10 @@ This implementation plan breaks down the Wikipedia Patrol Tool into discrete, ma
 - [ ] 7. Implement diff preview component
   - [ ] 7.1 Create diff display with MediaWiki API integration
     - Fetch and display page revision comparisons
+    - Implement navigation to previous revisions until a "clean" version is found
+    - Add "Review" (mark as patrolled) action
     - Implement keyboard navigation between diffs
-    - Add image hover preview and text selection features
+    - Add image hover preview and text selection web search
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
   
   - [ ]* 7.2 Write property test for diff display and navigation
@@ -113,8 +118,8 @@ This implementation plan breaks down the Wikipedia Patrol Tool into discrete, ma
 - [ ] 8. Build user information and action systems
   - [ ] 8.1 Create user information manager
     - Implement user data retrieval (info, contributions, blocks)
-    - Add IP address tools (Whois, quality assessment)
-    - Support user warning detection
+    - Add IP address tools (Whois, IPQualityScore)
+    - Support user warning detection and hiding (local session)
     - _Requirements: 3.1, 3.2, 3.5_
   
   - [ ]* 8.2 Write property test for user information display
@@ -127,7 +132,8 @@ This implementation plan breaks down the Wikipedia Patrol Tool into discrete, ma
   
   - [ ] 8.2 Implement action handler for user and page actions
     - Create revert, block, delete, protect functionality
-    - Add templated messaging and reason selection
+    - Handle differentiation between actual [Admin] actions and [Non-Admin] requests (SI, block request, etc.)
+    - Add templated messaging and reason selection (import from WP or custom)
     - Implement permission checking before action execution
     - _Requirements: 6.1, 6.5, 9.2, 5.1, 5.3_
   
@@ -145,7 +151,7 @@ This implementation plan breaks down the Wikipedia Patrol Tool into discrete, ma
 - [ ] 10. Implement page management and external integrations
   - [ ] 10.1 Create page action handlers
     - Implement watchlist management with confirmation
-    - Add maintenance banner selection based on page type
+    - Add maintenance banner selection with custom reason field (especially for new pages)
     - Integrate Earwig's copyvio detection tool
     - _Requirements: 5.2, 5.4, 5.5_
   
@@ -159,9 +165,9 @@ This implementation plan breaks down the Wikipedia Patrol Tool into discrete, ma
 
 - [ ] 11. Build session management and statistics
   - [ ] 11.1 Create session tracker and statistics manager
-    - Implement session history tracking for reviewed diffs
-    - Add real-time statistics display (reverts, active patrollers)
-    - Create notification system for talk page messages and thanks
+    - Implement session history tracking for reviewed diffs with access button
+    - Add real-time statistics display (reverts, active patrollers using the tool)
+    - Create notification system for talk page messages and thanks (visual alerts)
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
   
   - [ ]* 11.2 Write property test for session persistence
@@ -200,9 +206,9 @@ This implementation plan breaks down the Wikipedia Patrol Tool into discrete, ma
 
 - [ ] 14. Implement combined actions and advanced features
   - [ ] 14.1 Create combined action coordinator
-    - Implement simultaneous revert + messaging functionality
+    - Implement simultaneous revert + messaging functionality in one click
     - Add batch action support for multiple changes
-    - Create action templates with reason selection
+    - Create action templates with reason selection (manual or from WP lists)
     - _Requirements: 6.3, 3.3, 3.4, 5.1, 6.4_
   
   - [ ]* 14.2 Write property test for combined actions

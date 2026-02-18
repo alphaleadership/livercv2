@@ -1,0 +1,128 @@
+Description du projet
+Contexte
+
+Wikipédia est une encyclopédie collaborative qui peut être éditée par tout un chacun, que la personne soit enregistrée et utilise un pseudonyme, ou qu'elle intervienne sous IP. Celle liberté a comme corollaire un certain nombres de vandalismes volontaires, ou de maladresses qu'il convient de supprimer ou de corriger. Ces actions peuvent être réalisées soit par les utilisateurs qui découvrent ces modifications dans leur liste de suivi (en général les articles sur lesquels ils sont déjà intervenus, ou ceux qu'ils ont choisis unitairement, ou encore les articles propres à un projet thématique), soit par des volontaires autodésignés sans condition préalable, les « patrouilleurs » , qui utilisent alors soit une liste filtrante affichant de façon limitée (500 entrées maximum) les modifications récentes, soit un outils dédié, permettant de consulter l'intégralité de ces modifications. Cet outil permet de visualiser et d'agir sur les modifications (annulations, roll back, modification partielle) beaucoup plus rapidement que les listes de suivi ou la liste des changements récents. Il permet aussi d'interagir avec l'utilisateur, en le prévenant qu'il a fait une erreur sa page de discussion, via des modèles de message préformatés ou en demandant son blocage (pour les patrouilleurs simples) ou en le bloquant (pour les patrouilleurs dotés du statut administrateur).
+
+L'outil LiveRC, traditionnellement utilisé sur Wikipédia en français pour la patrouille, n'est quasiment plus mis à jour depuis 2014 environ. Quelques autres contributeurs (merci à eux) le maintiennent un peu de temps à autre pour que l'outil continue de tourner, mais il ne fait plus l'objet d'aucun développement, d'aucune amélioration. Son code est en outre obsolète : par exemple, il y a de nos jours des moyens plus efficaces pour récupérer la liste des modifications récentes, en temps réel. Enfin, LiveRC a une interface qui manque d'ergonomie (interface très chargée, liens très petits avec risques de missclik, etc.), arbore un look aujourd'hui désuet, manque de certaines fonctionnalités et en compte d'autres peu utilisées.
+Objectifs
+
+Les objectifs sont :
+
+    un logiciel qui soit adapté aux usages de la patrouille de Wikipédia francophone et, autant que possible, des patrouilleurs d'autres wikis (notamment ceux utilisant déjà LiveRC) ;
+    un logiciel qui conserve toutes les fonctionalités ''utiles'' de LiveRC et intègre des fonctionnalités manquantes (certaines inspirées de SWViewer, d'autres demandées par les patrouilleurs) ;
+    un logiciel qui soit relativement facile à prendre en main : il faut donc délaisser un certain nombre d'options inutiles et parfois saugrenues présentes dans LiveRC et surtout simplifier, épurer l'interface ;
+    un logiciel qui soit robuste techniquement, utilise les dernières fonctionnalités permises par Mediawiki, puisse être facilement maintenu (code bien structuré, documenté, etc.).
+
+Périmètre
+
+Cet outil sera à destination des utilisateurs avec déjà une petite expérience des wikis Wikimedia (pas les débutants, mais le logiciel ne doit pas être accessible qu'aux utilisateurs les plus expérimentés). [question non résolue : Dans quel contexte l'outil sera utilisé ? dans quel environnement ?]
+Environnement technique
+
+Application web, essentiellement codée en JavaScript. Utilisation importante de l'API MediaWiki. Utilisation d'EventStream pour la récupération des modifications en temps réel.
+
+Deux options :
+
+    sous forme de gadget MediaWiki
+    [option choisie] outil externe hébergé sur WikiMedia Cloud Services (authentification via OAuth)
+
+Interface modulaire utilisant http://golden-layout.com/ (ou assimilé).
+Fonctionnalités / besoins
+
+Note : lorsqu'il est indiqué diff, il peut alternativement s'agir d'une entrée de journal.
+
+    Une liste des modifications récentes filtrable selon quelques critères (IP, nouveaux/non relues, articles/ensemble des pages…)
+        actualisée en temps réel
+        possibilité de mettre en pause (suspend l'affichage des nouveaux diffs)
+        scroller vers le bas interrompt le défilement automatique (évite les erreurs de clic)
+        possibilité d'afficher les modifications récentes de plusieurs wikis (patrouille cross-wiki)
+        une ligne représente un diff ou une entrée de journal (il faut avoir une surface de clic agréable)
+        un clic n'importe où sur la ligne ouvre l'aperçu du diff
+        des raccourcis clavier permettent de naviguer entre les diffs de la liste
+        après avoir cliqué sur une ligne de diff, au choix (en option) :
+            la ligne disparaît de la liste ;
+            la ligne demeure mais est marquée comme lue au moyen d'un élément visuel.
+        un bouton « précédent » permet de réafficher les précédents diffs visualisés
+        un bouton pour vider la liste
+        une ligne contient les éléments suivants (sous forme textuelle ou signifié par un élément visuel) :
+            heure
+            l'auteur de la modification/entrée
+                nom utilisateur / IP
+                statut
+                blocage actuel ou antérieur (éventuellement nombre)
+                nombre de contributions
+                nombre de fois où l'utilisateur a été révoqué dans la session
+                existence d'avertissements (modèles {{Test 1}} et assimilés, {{Avertissement Copyvio}}) récents sur la page de discussion de l'utilisateur [fonctionnalité proposée par l'extension UserWarnings de LiveRC].
+            le titre de la page correspondante
+            statuts de protection de la page
+            résumé de modification (éventuellement tronqué)
+            différence en octet
+            certaines balises pertinentes (prédéfinies : par ex. reverts, blanchiments, etc.) (attention, certaines balises sont propres à chaque wiki, via AbuseFilter)
+            score ORES[Lequel ?]
+        critères de filtrage
+            nombre de contributions de l'utilisateur
+            ancienneté de l'utilisateur en nombre de jours
+            statuts (IP, utilisateur enregistré, autoconfirmed, autopatrolled, admin, bot)
+            espaces de nom
+            types de journaux (nouvelles pages, suppressions, protections, renommages, etc. + modifications bloquées par les filtres anti-abus)
+            score ORES[Lequel ?]
+            un système de whitelist/blacklist pour :
+                utilisateurs
+                balises
+            options permettant d'outrepasser les critères ci-dessus pour :
+                mes propres modifications
+                les révocations
+                les blanchiments
+                pages de la liste de suivi
+    Un composant d'aperçu des diffs
+        affichage classique du diff
+        naviguer entre les diffs d'une même page via des raccourcis clavier
+        Vis-à-vis de l'auteur de la modification
+            Informations :
+                nom d'utilisateur/IP → lien = liste des contributions
+                lien vers sa pdd (lien rouge si pdd n'existe pas)
+                statut
+                lien Whois
+                lien IPQualityScore (ou service similaire de détection de proxies ouverts)
+            Actions réalisable :
+                [admins] bloquer (éventuellement dépose d'un message de notification de blocage inclu sur la pdd) / [statut ?] requête de blocage
+                [statut ?] laisser un message (dépose un modèle)
+                cacher l'utilisateur : ses modifications n'apparaissent plus dans la liste des modifications récentes
+        Vis-à-vis de la page
+            Informations :
+                titre de la page (inclu le namespace) → lien = page
+                lien historique
+                lien discussion
+                lien modifier
+                lien protéger
+            Actions réalisables :
+                [admins] supprimer / [statut ?] requête de suppression (ajoute également un bandeau {{SI}} sur la page concernée)
+                [statut ?] ajouter un bandeau, uniquement pour les nouvelles pages (pour certains bandeaux, notamment {{admissibilité à vérifier}} et {{copie à vérifier}}, permettre de renseigner un motif dans le bandeau)
+                [admins] protéger / [statut ?] demander une protection
+                [statut ?] ajouter la page à sa liste de suivi
+                Recherche de copyvio avec Earwig's Copyvio Detector (exemple)
+        Vis-à-vis du diff :
+            Informations :
+                horodatage ancienne et nouvelle version
+                résumé de modification complet
+                liste exhaustive des balises
+            Actions réalisables :
+                [statut ?] annuler
+                [statut ?] révoquer [accessible pour tous où avec le status révocateur uniquement ?]
+                [admin] masquer / [statut ?] requête de masquage
+                relire la modification
+                afficher les images au survol
+                sélection d'un texte puis clic droit > rechercher sur le web
+                naviguer vers la modification précédente (et les précédentes, successivement, jusqu'à trouver une version saine) et pouvoir appliquer les mêmes actions que pour le diff le plus récent
+        pour toutes les actions
+            choix du motif dans une liste déroulante importée de WP (pour les actions admin) ou personnalisable dans le logiciel (pour les autres)
+            pouvoir préciser un motif manuellement
+            actions combinable avec une dépose de message sur la pdd de l'utilisateur en un clic.
+            actions réalisables via des raccourcis clavier
+    Composant barre d'état
+        Bouton donnant accès à la liste des diffs que l'on a visualisés pendant la session.
+        Statistiques :
+            sur le nombre de reverts via le logiciel dans les x dernières minutes
+            sur le nombre de patrouilleurs utilisant le logiciel dans les x dernières minutes
+        Notifications visuelles (comme dans l'interface de Wikipédia) lorsque le patrouilleur :
+            reçoit un message sur sa pdd,
+            reçoit une notification ou un remerciement.

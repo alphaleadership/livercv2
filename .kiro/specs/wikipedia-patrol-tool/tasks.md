@@ -6,13 +6,13 @@ This implementation plan breaks down the Wikipedia Patrol Tool into discrete, ma
 
 ## Tasks
 
-- [ ] 1. Set up project structure and core infrastructure
-  - Create directory structure for modular components
-  - Set up build system with webpack/vite for modern JavaScript development
-  - Configure testing framework (Jest + fast-check for property-based testing)
-  - Create base HTML template with golden-layout integration
-  - Set up OAuth configuration for MediaWiki authentication
-  - Prepare for hosting on WikiMedia Cloud Services (Toolforge)
+- [x] 1. Set up project structure and core infrastructure
+  - [x] Create directory structure for modular components
+  - [x] Set up build system with webpack/vite for modern JavaScript development
+  - [x] Configure testing framework (Jest + fast-check for property-based testing)
+  - [x] Create base HTML template with golden-layout integration
+  - [x] Set up OAuth configuration for MediaWiki authentication
+  - [x] Prepare for hosting on WikiMedia Cloud Services (Toolforge)
   - _Requirements: 9.1, 9.5_
 
 - [ ] 2. Implement core API client and authentication
@@ -36,11 +36,11 @@ This implementation plan breaks down the Wikipedia Patrol Tool into discrete, ma
     - **Validates: Requirements 2.3**
 
 - [ ] 3. Build EventStream manager and real-time connectivity
-  - [ ] 3.1 Create EventStream connection manager
-    - Implement WebSocket connection to MediaWiki EventStream
-    - Add connection state management (connect, disconnect, pause, resume)
-    - Implement auto-scroll interruption when scrolling down
-    - Support multiple wiki monitoring simultaneously
+  - [x] 3.1 Create EventStream connection manager
+    - [x] Implement WebSocket connection to MediaWiki EventStream
+    - [x] Add connection state management (connect, disconnect, pause, resume)
+    - [ ] Implement auto-scroll interruption when scrolling down
+    - [x] Support multiple wiki monitoring simultaneously
     - _Requirements: 1.1, 1.2, 1.5_
   
   - [ ]* 3.2 Write property test for real-time change processing
@@ -58,32 +58,32 @@ This implementation plan breaks down the Wikipedia Patrol Tool into discrete, ma
 - [ ] 4. Checkpoint - Ensure core connectivity works
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 5. Implement filter management system
-  - [ ] 5.1 Create filter manager with all criteria types
-    - Implement user filters (edit count, account age, user types)
-    - Add namespace and ORES score filtering
-    - Create whitelist/blacklist functionality with override options
+- [x] 5. Implement filter management system
+  - [x] 5.1 Create filter manager with all criteria types
+    - [x] Implement user filters (edit count, account age, user types)
+    - [x] Add namespace and ORES score filtering
+    - [x] Create whitelist/blacklist functionality with override options
     - _Requirements: 2.1, 2.2, 2.3, 2.4_
   
-  - [ ]* 5.2 Write property test for comprehensive filtering
+  - [x]* 5.2 Write property test for comprehensive filtering
     - **Property 4: Comprehensive Filtering Consistency**
     - **Validates: Requirements 2.1, 2.2, 2.3, 2.4**
   
-  - [ ] 5.3 Add filter configuration import/export
-    - Support loading filter settings from Wikipedia or external sources
-    - Implement configuration persistence across sessions
+  - [x] 5.3 Add filter configuration import/export
+    - [x] Support loading filter settings from Wikipedia or external sources
+    - [x] Implement configuration persistence across sessions
     - _Requirements: 10.2, 10.3_
   
-  - [ ]* 5.4 Write property test for configuration persistence
+  - [x]* 5.4 Write property test for configuration persistence
     - **Property 22: Configuration Persistence and Import**
     - **Validates: Requirements 10.2, 10.3, 10.5**
 
-- [ ] 6. Build recent changes list component
-  - [ ] 6.1 Create changes list UI component
-    - Implement change display with large click area (click anywhere to open diff)
-    - Add session-specific data: user revert count in session, recent warnings detection
-    - Support change status management (reviewed, hidden)
-    - Add "Clear List" and "Back" (history) navigation buttons
+- [x] 6. Build recent changes list component
+  - [x] 6.1 Create changes list UI component
+    - [x] Implement change display with large click area (click anywhere to open diff)
+    - [ ] Add session-specific data: user revert count in session, recent warnings detection
+    - [x] Support change status management (reviewed, hidden)
+    - [x] Add "Clear List" and "Back" (history) navigation buttons
     - _Requirements: 2.5, 2.6, 6.2_
   
   - [ ]* 6.2 Write property test for change information display
@@ -98,13 +98,13 @@ This implementation plan breaks down the Wikipedia Patrol Tool into discrete, ma
     - **Property 14: Change Status Management**
     - **Validates: Requirements 6.2**
 
-- [ ] 7. Implement diff preview component
-  - [ ] 7.1 Create diff display with MediaWiki API integration
-    - Fetch and display page revision comparisons
-    - Implement navigation to previous revisions until a "clean" version is found
-    - Add "Review" (mark as patrolled) action
-    - Implement keyboard navigation between diffs
-    - Add image hover preview and text selection web search
+- [x] 7. Implement diff preview component
+  - [x] 7.1 Create diff display with MediaWiki API integration
+    - [x] Fetch and display page revision comparisons
+    - [ ] Implement navigation to previous revisions until a "clean" version is found
+    - [x] Add "Review" (mark as patrolled) action
+    - [ ] Implement keyboard navigation between diffs
+    - [ ] Add image hover preview and text selection web search
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
   
   - [ ]* 7.2 Write property test for diff display and navigation
@@ -116,10 +116,10 @@ This implementation plan breaks down the Wikipedia Patrol Tool into discrete, ma
     - **Validates: Requirements 4.3, 4.4**
 
 - [ ] 8. Build user information and action systems
-  - [ ] 8.1 Create user information manager
-    - Implement user data retrieval (info, contributions, blocks)
-    - Add IP address tools (Whois, IPQualityScore)
-    - Support user warning detection and hiding (local session)
+  - [x] 8.1 Create user information manager
+    - [x] Implement user data retrieval (info, contributions, blocks)
+    - [ ] Add IP address tools (Whois, IPQualityScore)
+    - [ ] Support user warning detection and hiding (local session)
     - _Requirements: 3.1, 3.2, 3.5_
   
   - [ ]* 8.2 Write property test for user information display

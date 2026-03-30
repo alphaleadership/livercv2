@@ -1,40 +1,37 @@
-body, html {
-    margin: 0;
-    padding: 0;
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-    background-color: #1a1a1a;
-    color: #e0e0e0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+@import '@wikimedia/codex/dist/codex.style.css';
+
+/* Styles de base pour l'isolation */
+#liverc-v2-main-container {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    color: #202122;
 }
 
-#layout-container {
-    width: 100vw;
-    height: 100vh;
-}
-
-.component-content {
-    padding: 10px;
-    height: 100%;
-    box-sizing: border-box;
-}
-
-/* Overriding GoldenLayout styles for a more modern look */
+/* Overrides GoldenLayout pour une intégration MediaWiki */
 .lm_header {
-    background: #2d2d2d !important;
+    background: #eaecf0 !important;
+    border-bottom: 1px solid #a2a9b1 !important;
 }
 
 .lm_tab {
-    background: #3d3d3d !important;
-    color: #b0b0b0 !important;
+    background: #f8f9fa !important;
+    border: 1px solid #a2a9b1 !important;
+    border-bottom: none !important;
+    margin-right: 2px !important;
+    color: #202122 !important;
 }
 
 .lm_tab.lm_active {
-    background: #4d4d4d !important;
-    color: #ffffff !important;
+    background: #ffffff !important;
+    border-bottom: 1px solid #ffffff !important;
+    font-weight: bold !important;
 }
 
 .lm_content {
-    background: #1a1a1a !important;
+    background: #ffffff !important;
+    border: 1px solid #a2a9b1 !important;
 }
+
+/* Utilitaires de texte */
+.diff-plus { color: #14866d; }
+.diff-minus { color: #d33; }

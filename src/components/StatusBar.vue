@@ -49,8 +49,6 @@ const clearNotifications = () => {
 </template>
 
 <style scoped>
-@import '@wikimedia/codex/dist/codex.style.css';
-
 .status-bar {
   display: flex;
   justify-content: space-between;

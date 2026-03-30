@@ -132,8 +132,6 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-@import '@wikimedia/codex/dist/codex.style.css';
-
 .changes-list-container {
   display: flex;
   flex-direction: column;

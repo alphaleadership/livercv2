@@ -6,80 +6,74 @@ import ChangesList from './components/ChangesList.vue';
 import DiffPreview from './components/DiffPreview.vue';
 import UserInfo from './components/UserInfo.vue';
 import StatusBar from './components/StatusBar.vue';
+import Sidebar from './components/Sidebar.vue';
 
-/**
- * Injection isolée du CSS
- */
-const injectStyles = (target: HTMLElement) => {
+const injectStyles = () => {
+    if (document.getElementById('liverc-v2-styles')) return;
     const styleTag = document.createElement('style');
-    styleTag.id = 'liverc-v2-injected-styles';
+    styleTag.id = 'liverc-v2-styles';
     styleTag.textContent = cssStyles;
-    target.appendChild(styleTag);
+    document.head.appendChild(styleTag);
 };
 
-/**
- * Initialisation de l'interface LiveRC v2
- */
 const startLiveRC = () => {
     const contentElement = document.getElementById('mw-content-text');
     if (!contentElement || document.getElementById('liverc-v2-main-container')) return;
 
-    // Masquer les éléments perturbateurs de Wikipédia sur la page cible
-    document.body.classList.add('liverc-active');
-    const firstHeading = document.getElementById('firstHeading');
-    if (firstHeading) firstHeading.style.display = 'none';
-    const siteSub = document.getElementById('siteSub');
-    if (siteSub) siteSub.style.display = 'none';
-    const contentSub = document.getElementById('contentSub');
-    if (contentSub) contentSub.style.display = 'none';
+    // Plein écran : on cache tout le superflu
+    const elementsToHide = ['firstHeading', 'siteSub', 'contentSub', 'left-navigation', 'right-navigation', 'p-cactions', 'p-views'];
+    elementsToHide.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
 
-    // Création de la racine de l'application
     const appContainer = document.createElement('div');
     appContainer.id = 'liverc-v2-main-container';
-    
-    // Nettoyage et préparation
     contentElement.innerHTML = '';
     contentElement.appendChild(appContainer);
 
-    injectStyles(appContainer);
+    injectStyles();
 
-    // Taille maximale : on occupe tout l'écran disponible
+    // Dimensions plein écran dynamique
     appContainer.style.width = '100%';
-    appContainer.style.height = 'calc(100vh - 120px)'; // Ajusté pour le header WP
-    appContainer.style.minHeight = '700px';
-    appContainer.style.border = '1px solid #a2a9b1';
+    appContainer.style.height = 'calc(100vh - 50px)'; // On garde juste une marge pour le header WP
+    appContainer.style.background = 'white';
 
     const layoutConfig: LayoutConfig = {
         root: {
             type: 'column',
             content: [{
                 type: 'row',
-                height: 95,
+                height: 96,
                 content: [{
-                    type: 'stack',
-                    width: 35,
-                    content: [{
-                        type: 'component',
-                        componentType: 'ChangesList',
-                        title: 'Modifications'
-                    }]
+                    type: 'component',
+                    componentType: 'Sidebar',
+                    title: 'Menu',
+                    width: 15,
+                    header: { show: false }
                 }, {
-                    type: 'column',
+                    type: 'component',
+                    componentType: 'ChangesList',
+                    title: 'Modifications',
+                    width: 25
+                }, {
+                    type: 'stack',
+                    width: 60,
                     content: [{
                         type: 'component',
                         componentType: 'DiffPreview',
-                        title: 'Aperçu'
+                        title: 'Aperçu Diff'
                     }, {
                         type: 'component',
                         componentType: 'UserInfo',
-                        title: 'Utilisateur'
+                        title: 'Contributeur'
                     }]
                 }]
             }, {
                 type: 'component',
                 componentType: 'StatusBar',
-                title: 'Stats',
-                height: 5,
+                title: 'StatusBar',
+                height: 4,
                 header: { show: false }
             }]
         }
@@ -91,6 +85,7 @@ const startLiveRC = () => {
         layout.registerComponentFactoryFunction(name, (container) => {
             const app = createApp(component);
             app.mount(container.element);
+            container.element.style.overflow = 'auto';
         });
     };
 
@@ -98,17 +93,15 @@ const startLiveRC = () => {
     registerComp('DiffPreview', DiffPreview);
     registerComp('UserInfo', UserInfo);
     registerComp('StatusBar', StatusBar);
+    registerComp('Sidebar', Sidebar);
 
     layout.loadLayout(layoutConfig);
 
     window.addEventListener('resize', () => {
-        if (appContainer.offsetWidth > 0) {
-            layout.updateSize(appContainer.offsetWidth, appContainer.offsetHeight);
-        }
+        layout.updateSize(appContainer.offsetWidth, appContainer.offsetHeight);
     });
 };
 
-// Point d'entrée sécurisé pour MediaWiki
 // @ts-ignore
 if (typeof mw !== 'undefined') {
     // @ts-ignore
@@ -116,23 +109,12 @@ if (typeof mw !== 'undefined') {
         // @ts-ignore
         const pageName = mw.config.get('wgPageName');
         const targetPage = 'Wikipédia:LiveRC';
-
-        // Lien dans la barre latérale (toujours présent)
         // @ts-ignore
-        mw.util.addPortletLink(
-            'p-navigation', 
-            // @ts-ignore
-            mw.util.getUrl(targetPage), 
-            'LiveRC v2', 
-            'n-livercv2',
-            'Lancer LiveRC v2'
-        );
+        mw.util.addPortletLink('p-navigation', mw.util.getUrl(targetPage), 'LiveRC v2', 'n-livercv2');
 
         if (pageName === targetPage || pageName === 'Wikipedia:LiveRC') {
             // @ts-ignore
-            mw.hook('wikipage.content').add(() => {
-                startLiveRC();
-            });
+            mw.hook('wikipage.content').add(() => startLiveRC());
         }
     });
 }

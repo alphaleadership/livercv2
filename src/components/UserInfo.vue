@@ -122,8 +122,6 @@ const onBlock = async () => {
 </template>
 
 <style scoped>
-@import '@wikimedia/codex/dist/codex.style.css';
-
 .user-info-container {
   padding: 16px;
   color: #202122;

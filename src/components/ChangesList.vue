@@ -6,6 +6,8 @@ import { RecentChange } from '@/types/mediawiki-events';
 import { DEFAULT_FILTERS, FilterCriteria } from '@/types/filters';
 import { state, selectChange } from '@/core/state-manager';
 import { keyboardManager } from '@/core/keyboard-manager';
+import { CdxButton, CdxIcon } from '@wikimedia/codex';
+import { cdxIconPause, cdxIconPlay, cdxIconClear, cdxIconArticle } from '@wikimedia/codex-icons';
 
 interface ChangeEntry extends RecentChange {
   formattedTime: string;
@@ -16,7 +18,6 @@ const changes = ref<ChangeEntry[]>([]);
 const isPaused = ref(false);
 const streamManager = new EventStreamManager(['frwiki']);
 
-// Gestion des filtres avec persistance
 const savedFilters = localStorage.getItem('liverc_filters');
 const initialFilters: FilterCriteria = savedFilters ? JSON.parse(savedFilters) : DEFAULT_FILTERS;
 const filterManager = new FilterManager(initialFilters);
@@ -37,18 +38,13 @@ const handleNewChange = (rc: RecentChange) => {
     };
 
     changes.value.unshift(newEntry);
-    if (changes.value.length > 500) {
-        changes.value.pop();
-    }
+    if (changes.value.length > 500) changes.value.pop();
 };
 
 const togglePause = () => {
   isPaused.value = !isPaused.value;
-  if (isPaused.value) {
-      streamManager.pause();
-  } else {
-      streamManager.resume();
-  }
+  if (isPaused.value) streamManager.pause();
+  else streamManager.resume();
 };
 
 const clearList = () => {
@@ -61,28 +57,15 @@ const onRowClick = (change: ChangeEntry) => {
 
 const selectNext = () => {
     if (changes.value.length === 0) return;
-    if (!state.selectedChange) {
-        selectChange(changes.value[0]);
-        return;
-    }
-    const currentIndex = changes.value.findIndex(c => c.meta.id === state.selectedChange?.meta.id);
-    if (currentIndex < changes.value.length - 1) {
-        selectChange(changes.value[currentIndex + 1]);
-    }
+    const currentIndex = state.selectedChange ? changes.value.findIndex(c => c.meta.id === state.selectedChange?.meta.id) : -1;
+    if (currentIndex < changes.value.length - 1) selectChange(changes.value[currentIndex + 1]);
 };
 
 const selectPrevious = () => {
     if (!state.selectedChange || changes.value.length === 0) return;
     const currentIndex = changes.value.findIndex(c => c.meta.id === state.selectedChange?.meta.id);
-    if (currentIndex > 0) {
-        selectChange(changes.value[currentIndex - 1]);
-    }
+    if (currentIndex > 0) selectChange(changes.value[currentIndex - 1]);
 };
-
-watch(currentFilters, (newVal) => {
-    filterManager.updateCriteria(newVal);
-    localStorage.setItem('liverc_filters', JSON.stringify(newVal));
-}, { deep: true });
 
 onMounted(() => {
     streamManager.onNewChange(handleNewChange);
@@ -100,20 +83,27 @@ onUnmounted(() => {
 <template>
   <div class="changes-list-container">
     <div class="toolbar">
-      <button @click="togglePause">{{ isPaused ? 'Reprendre' : 'Pause' }}</button>
-      <button @click="clearList">Vider</button>
-      <span class="status">{{ isPaused ? '⏸ En pause' : '▶ En direct' }}</span>
+      <cdx-button size="small" @click="togglePause" :weight="isPaused ? 'primary' : 'quiet'">
+        <template #icon><cdx-icon :icon="isPaused ? cdxIconPlay : cdxIconPause" /></template>
+        {{ isPaused ? 'Reprendre' : 'Pause' }}
+      </cdx-button>
+      <cdx-button size="small" weight="quiet" @click="clearList">
+        <template #icon><cdx-icon :icon="cdxIconClear" /></template>
+        Vider
+      </cdx-button>
+      <span class="status-badge" :class="{ 'paused': isPaused }">
+        {{ isPaused ? 'Flux arrêté' : 'Flux en direct' }}
+      </span>
     </div>
     
     <div class="list-wrapper">
-      <table>
+      <table class="cdx-docs-table">
         <thead>
           <tr>
-            <th>Heure</th>
-            <th>Page</th>
-            <th>Utilisateur</th>
-            <th>Diff</th>
-            <th>Résumé</th>
+            <th class="col-time">Heure</th>
+            <th class="col-page">Page</th>
+            <th class="col-user">Contributeur</th>
+            <th class="col-diff">±</th>
           </tr>
         </thead>
         <tbody>
@@ -125,13 +115,15 @@ onUnmounted(() => {
                   'reviewed': state.reviewedIds.has(change.meta.id)
               }"
               @click="onRowClick(change)">
-            <td>{{ change.formattedTime }}</td>
-            <td class="page-title">{{ change.title }}</td>
-            <td>{{ change.user }}</td>
-            <td :class="change.diffSize > 0 ? 'diff-plus' : 'diff-minus'">
+            <td class="col-time">{{ change.formattedTime }}</td>
+            <td class="col-page">
+              <cdx-icon :icon="cdxIconArticle" size="x-small" />
+              {{ change.title }}
+            </td>
+            <td class="col-user">{{ change.user }}</td>
+            <td class="col-diff" :class="change.diffSize > 0 ? 'diff-plus' : 'diff-minus'">
               {{ change.diffSize > 0 ? '+' : '' }}{{ change.diffSize }}
             </td>
-            <td class="summary">{{ change.comment }}</td>
           </tr>
         </tbody>
       </table>
@@ -140,69 +132,81 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+@import '@wikimedia/codex/dist/codex.style.css';
+
 .changes-list-container {
   display: flex;
   flex-direction: column;
   height: 100%;
+  background: white;
 }
 
 .toolbar {
-  padding: 5px;
-  background: #2d2d2d;
-  border-bottom: 1px solid #444;
+  padding: 8px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #a2a9b1;
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
 }
+
+.status-badge {
+  margin-left: auto;
+  font-size: 0.75em;
+  color: #14866d;
+  font-weight: bold;
+}
+
+.status-badge.paused { color: #d33; }
 
 .list-wrapper {
   flex: 1;
   overflow-y: auto;
 }
 
-table {
+.cdx-docs-table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 0.9em;
 }
 
 th {
   text-align: left;
-  padding: 8px;
-  background: #333;
+  padding: 12px 8px;
+  background: #eaecf0;
+  color: #202122;
   position: sticky;
   top: 0;
+  z-index: 1;
 }
 
 td {
-  padding: 6px 8px;
-  border-bottom: 1px solid #333;
+  padding: 8px;
+  border-bottom: 1px solid #eaecf0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .change-row:hover {
-  background: #2a2a2a;
+  background: #f8f9fa;
   cursor: pointer;
 }
 
 .change-row.selected {
-  background: #3d3d3d;
-  border-left: 3px solid #a7d7f9;
+  background: #eaf3ff;
+  border-left: 4px solid #36c;
 }
 
 .change-row.reviewed {
-  opacity: 0.6;
+  opacity: 0.5;
 }
 
-.change-row.reviewed td {
-  text-decoration: line-through #555;
-}
+.col-time { width: 80px; color: #72777d; }
+.col-page { color: #36c; font-weight: bold; }
+.col-user { width: 120px; }
+.col-diff { width: 60px; font-weight: bold; text-align: right; }
 
-.page-title {
-  color: #a7d7f9;
-  font-weight: bold;
-}
-
-.diff-plus { color: #00af89; }
+.diff-plus { color: #14866d; }
 .diff-minus { color: #d33; }
-.summary { font-style: italic; font-size: 0.9em; }
-.status { font-size: 0.8em; margin-left: auto; }
 </style>

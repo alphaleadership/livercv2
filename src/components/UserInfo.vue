@@ -2,8 +2,10 @@
 import { ref, watch } from 'vue';
 import { state, addNotification } from '@/core/state-manager';
 import { MWClient } from '@/api/mw-client';
+import { CdxButton, CdxIcon, CdxThumbnail } from '@wikimedia/codex';
+import { cdxIconUserGroup, cdxIconEdit, cdxIconCalendar, cdxIconBlock, cdxIconInfo } from '@wikimedia/codex-icons';
 
-const mwClient = new MWClient({ apiUrl: 'https://fr.wikipedia.org/w/api.php' });
+const mwClient = new MWClient();
 const userDetails = ref<any>(null);
 const isLoading = ref(false);
 
@@ -32,27 +34,29 @@ const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('fr-FR');
 };
 
+const isIP = (name: string): boolean => {
+    if (!name) return false;
+    const ipv4Regex = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
+    const ipv6Regex = /^(?:[A-F0-9]{1,4}:){7}[A-F0-9]{1,4}$/i;
+    return ipv4Regex.test(name) || ipv6Regex.test(name);
+};
+
 const onBlock = async () => {
     if (!userDetails.value) return;
-
     const username = userDetails.value.name;
-    const expiry = prompt(`Durée du blocage pour ${username} (ex: 24 hours, infinite) :`, '24 hours');
+    const expiry = prompt(`Durée du blocage pour ${username} :`, '24 hours');
     if (!expiry) return;
-
     const reason = prompt(`Motif du blocage pour ${username} :`, 'Vandalisme répété');
     if (!reason) return;
 
     try {
         const result = await mwClient.block(username, expiry, reason);
         if (result.block) {
-            addNotification(`Utilisateur ${username} bloqué pour ${expiry}`, 'success');
-            fetchUserInfo(); // Rafraîchir les infos pour voir le statut bloqué
-        } else if (result.error) {
-            addNotification(`Erreur de blocage : ${result.error.info}`, 'alert');
+            addNotification(`Utilisateur ${username} bloqué`, 'success');
+            fetchUserInfo();
         }
-    } catch (error) {
-        console.error('Block failed:', error);
-        addNotification('Échec de la requête de blocage.', 'alert');
+    } catch (e) {
+        addNotification('Erreur lors du blocage', 'alert');
     }
 };
 </script>
@@ -60,131 +64,131 @@ const onBlock = async () => {
 <template>
   <div class="user-info-container component-content">
     <div v-if="state.selectedChange" class="user-wrapper">
-      <div v-if="isLoading" class="loading">Chargement des données...</div>
+      <div v-if="isLoading" class="loading">Chargement...</div>
       <div v-else-if="userDetails">
         <div class="user-header">
-          <h3>{{ userDetails.name }}</h3>
-          <div class="user-badges" v-if="userDetails.groups">
-            <span v-for="group in userDetails.groups" :key="group" class="badge">
+          <h3>
+            <cdx-icon :icon="cdxIconUserGroup" />
+            {{ userDetails.name }}
+          </h3>
+          <div class="user-badges">
+            <span v-for="group in userDetails.groups" :key="group" class="cdx-docs-badge">
               {{ group }}
             </span>
           </div>
         </div>
         
-        <div class="user-details">
-          <p>📝 <strong>Contributions :</strong> {{ userDetails.editcount || 0 }}</p>
-          <p>📅 <strong>Inscription :</strong> {{ formatDate(userDetails.registration) }}</p>
-          <p v-if="userDetails.blockid" class="blocked-status">
-            🚫 <strong>BLOQUÉ</strong> par {{ userDetails.blockedby }}
-            <br><small>Motif : {{ userDetails.blockreason }}</small>
-          </p>
+        <div class="user-details-grid">
+          <div class="detail-item">
+            <cdx-icon :icon="cdxIconEdit" size="small" />
+            <span><strong>{{ userDetails.editcount || 0 }}</strong> contributions</span>
+          </div>
+          <div class="detail-item">
+            <cdx-icon :icon="cdxIconCalendar" size="small" />
+            <span>Inscrit le {{ formatDate(userDetails.registration) }}</span>
+          </div>
+          <div v-if="userDetails.blockid" class="blocked-alert">
+            <cdx-icon :icon="cdxIconBlock" color="error" />
+            <strong>BLOQUÉ</strong> par {{ userDetails.blockedby }}
+          </div>
         </div>
         
         <div class="user-actions">
-          <a :href="`https://fr.wikipedia.org/wiki/Special:Contributions/${userDetails.name}`" target="_blank" class="action-btn">Contribs</a>
-          <a :href="`https://fr.wikipedia.org/wiki/User_talk:${userDetails.name}`" target="_blank" class="action-btn">PDD</a>
+          <cdx-button action="progressive" weight="quiet" 
+            :href="`https://fr.wikipedia.org/wiki/Special:Contributions/${userDetails.name}`" target="_blank">
+            Contributions
+          </cdx-button>
+          <cdx-button action="progressive" weight="quiet"
+            :href="`https://fr.wikipedia.org/wiki/User_talk:${userDetails.name}`" target="_blank">
+            Discussion
+          </cdx-button>
+          
           <template v-if="isIP(userDetails.name)">
-            <a :href="`https://whois.toolforge.org/gateway.py?lookup=true&ip=${userDetails.name}`" target="_blank" class="action-btn whois-btn">Whois</a>
-            <a :href="`https://www.ipqualityscore.com/free-ip-lookup-proxy-vpn-test/lookup/${userDetails.name}`" target="_blank" class="action-btn ipqs-btn">Proxy Check</a>
+            <cdx-button weight="quiet" :href="`https://whois.toolforge.org/gateway.py?lookup=true&ip=${userDetails.name}`" target="_blank">Whois</cdx-button>
           </template>
-          <button @click="onBlock" class="block-btn" v-if="!userDetails.blockid">Bloquer</button>
+          
+          <cdx-button action="destructive" weight="primary" v-if="!userDetails.blockid" @click="onBlock">
+            <template #icon><cdx-icon :icon="cdxIconBlock" /></template>
+            Bloquer
+          </cdx-button>
         </div>
       </div>
-      <div v-else class="error">Impossible de charger les données de l'utilisateur.</div>
     </div>
     <div v-else class="no-selection">
-        Sélectionnez une modification pour voir les infos utilisateur.
+        <cdx-icon :icon="cdxIconInfo" size="large" />
+        <p>Sélectionnez un contributeur</p>
     </div>
   </div>
 </template>
 
-<script setup lang="ts">
-// ... imports existants ...
-
-const isIP = (name: string): boolean => {
-    if (!name) return false;
-    const ipv4Regex = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
-    const ipv6Regex = /^(?:[A-F0-9]{1,4}:){7}[A-F0-9]{1,4}$/i;
-    return ipv4Regex.test(name) || ipv6Regex.test(name);
-};
-</script>
-
 <style scoped>
-/* ... styles existants ... */
-.whois-btn { background-color: #4a148c; }
-.ipqs-btn { background-color: #0d47a1; }
-.action-btn:hover { opacity: 0.8; }
-</style>
+@import '@wikimedia/codex/dist/codex.style.css';
 
-<style scoped>
 .user-info-container {
+  padding: 16px;
+  color: #202122;
+  background: white;
+}
+
+.user-header h3 {
+  margin: 0 0 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.cdx-docs-badge {
+  background: #eaecf0;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.75em;
+  color: #54595d;
+}
+
+.user-details-grid {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  gap: 12px;
+  margin-bottom: 24px;
 }
 
-.user-wrapper {
-  height: 100%;
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #54595d;
 }
 
-.user-header {
-  border-bottom: 1px solid #444;
-  padding-bottom: 10px;
-  margin-bottom: 15px;
-}
-
-.badge {
-  background: #3d3d3d;
-  font-size: 0.75em;
-  padding: 2px 6px;
-  border-radius: 4px;
-  margin-right: 5px;
-  color: #a7d7f9;
-}
-
-.user-details p {
-  margin: 8px 0;
-}
-
-.blocked-status {
-  color: #d33;
-  padding: 8px;
-  background: rgba(211, 47, 47, 0.1);
+.blocked-alert {
+  padding: 12px;
+  background: #fee7e6;
   border: 1px solid #d33;
-  border-radius: 4px;
+  border-radius: 2px;
+  color: #d33;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .user-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
-  margin-top: 20px;
-}
-
-.action-btn {
-  background: #3d3d3d;
-  color: #e0e0e0;
-  text-decoration: none;
-  padding: 5px 10px;
-  border-radius: 3px;
-  font-size: 0.9em;
-}
-
-.block-btn {
-  background-color: #d33;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 3px;
-  cursor: pointer;
-  font-weight: bold;
 }
 
 .no-selection {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    color: #777;
-    font-style: italic;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #72777d;
 }
 </style>

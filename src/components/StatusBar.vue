@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { state } from '@/core/state-manager';
+import { CdxButton, CdxIcon } from '@wikimedia/codex';
+import { cdxIconHistory, cdxIconCheckAll, cdxIconBlock, cdxIconBell } from '@wikimedia/codex-icons';
 
 const elapsedTime = computed(() => {
     const diff = Math.floor((Date.now() - state.sessionStats.startTime) / 60000);
@@ -13,56 +15,65 @@ const clearNotifications = () => {
 </script>
 
 <template>
-  <div class="status-bar">
+  <div class="status-bar cdx-docs-status-bar">
     <div class="stats-section">
       <span class="stat-item" title="Modifications marquées comme lues">
-        ✅ {{ state.sessionStats.patrolled }} relues
+        <cdx-icon :icon="cdxIconCheckAll" size="small" /> {{ state.sessionStats.patrolled }} relues
       </span>
       <span class="stat-item" title="Annulations effectuées">
-        🚫 {{ state.sessionStats.reverts }} révocations
+        <cdx-icon :icon="cdxIconBlock" size="small" /> {{ state.sessionStats.reverts }} révocations
       </span>
       <span class="stat-item">
-        ⏱ Session : {{ elapsedTime }}
+        ⏱ {{ elapsedTime }}
       </span>
     </div>
 
     <div class="notifications-section">
-      <div v-if="state.notifications.length > 0" class="notif-wrapper">
-        <span class="notif-text" :class="state.notifications[0].type">
-          🔔 {{ state.notifications[0].text }}
+      <div v-if="state.notifications.length > 0" class="notif-wrapper" :class="state.notifications[0].type">
+        <cdx-icon :icon="cdxIconBell" size="small" />
+        <span class="notif-text">
+          {{ state.notifications[0].text }}
         </span>
-        <button @click="clearNotifications" class="close-notif">×</button>
+        <cdx-button weight="quiet" action="destructive" size="small" @click="clearNotifications">×</cdx-button>
       </div>
-      <span v-else class="no-notif">Prêt à patrouiller</span>
+      <span v-else class="no-notif">LiveRC v2 prêt</span>
     </div>
 
     <div class="history-section">
-      <button class="history-btn">📚 Historique ({{ state.history.length }})</button>
+      <cdx-button size="small" weight="quiet">
+        <template #icon><cdx-icon :icon="cdxIconHistory" /></template>
+        Historique ({{ state.history.length }})
+      </cdx-button>
     </div>
   </div>
 </template>
 
 <style scoped>
+@import '@wikimedia/codex/dist/codex.style.css';
+
 .status-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   height: 100%;
-  padding: 0 10px;
-  background: #2d2d2d;
-  color: #e0e0e0;
+  padding: 0 12px;
+  background: #f8f9fa; /* Fond clair Codex par défaut */
+  color: #202122;
   font-size: 0.85em;
-  border-top: 1px solid #444;
+  border-top: 1px solid #a2a9b1;
 }
 
 .stats-section, .history-section {
   display: flex;
-  gap: 15px;
+  gap: 16px;
   align-items: center;
 }
 
 .stat-item {
-  color: #ccc;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #54595d;
 }
 
 .notifications-section {
@@ -73,42 +84,20 @@ const clearNotifications = () => {
 }
 
 .notif-wrapper {
-  background: #3d3d3d;
-  padding: 2px 10px;
-  border-radius: 4px;
+  padding: 2px 12px;
+  border-radius: 2px;
   display: flex;
   align-items: center;
   gap: 8px;
-  border-left: 3px solid #a7d7f9;
+  border: 1px solid #a2a9b1;
 }
 
-.notif-text.alert { color: #ffeb3b; }
-.notif-text.success { color: #00af89; }
-.notif-text.message { color: #a7d7f9; }
-
-.close-notif {
-  background: none;
-  border: none;
-  color: #888;
-  cursor: pointer;
-  padding: 0 2px;
-}
-
-.history-btn {
-  background: #444;
-  border: none;
-  color: white;
-  padding: 2px 8px;
-  border-radius: 3px;
-  cursor: pointer;
-}
-
-.history-btn:hover {
-  background: #555;
-}
+.notif-wrapper.success { background-color: #d5fdf4; border-color: #14866d; color: #14866d; }
+.notif-wrapper.alert { background-color: #fef6e7; border-color: #ac6600; color: #ac6600; }
+.notif-wrapper.message { background-color: #eaecf0; border-color: #36c; color: #36c; }
 
 .no-notif {
-  color: #777;
+  color: #72777d;
   font-style: italic;
 }
 </style>

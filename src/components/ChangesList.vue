@@ -5,6 +5,7 @@ import { FilterManager } from '@/core/filter-manager';
 import { RecentChange } from '@/types/mediawiki-events';
 import { DEFAULT_FILTERS, FilterCriteria } from '@/types/filters';
 import { state, selectChange } from '@/core/state-manager';
+import { keyboardManager } from '@/core/keyboard-manager';
 
 interface ChangeEntry extends RecentChange {
   formattedTime: string;
@@ -58,6 +59,26 @@ const onRowClick = (change: ChangeEntry) => {
     selectChange(change);
 };
 
+const selectNext = () => {
+    if (changes.value.length === 0) return;
+    if (!state.selectedChange) {
+        selectChange(changes.value[0]);
+        return;
+    }
+    const currentIndex = changes.value.findIndex(c => c.meta.id === state.selectedChange?.meta.id);
+    if (currentIndex < changes.value.length - 1) {
+        selectChange(changes.value[currentIndex + 1]);
+    }
+};
+
+const selectPrevious = () => {
+    if (!state.selectedChange || changes.value.length === 0) return;
+    const currentIndex = changes.value.findIndex(c => c.meta.id === state.selectedChange?.meta.id);
+    if (currentIndex > 0) {
+        selectChange(changes.value[currentIndex - 1]);
+    }
+};
+
 watch(currentFilters, (newVal) => {
     filterManager.updateCriteria(newVal);
     localStorage.setItem('liverc_filters', JSON.stringify(newVal));
@@ -66,10 +87,13 @@ watch(currentFilters, (newVal) => {
 onMounted(() => {
     streamManager.onNewChange(handleNewChange);
     streamManager.connect();
+    keyboardManager.register({ key: 'ArrowDown', description: 'Suivant', handler: selectNext });
+    keyboardManager.register({ key: 'ArrowUp', description: 'Précédent', handler: selectPrevious });
 });
 
 onUnmounted(() => {
     streamManager.disconnect();
+    keyboardManager.unregisterAll();
 });
 </script>
 

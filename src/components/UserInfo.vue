@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { state } from '@/core/state-manager';
+import { state, addNotification } from '@/core/state-manager';
 import { MWClient } from '@/api/mw-client';
 
 const mwClient = new MWClient({ apiUrl: 'https://fr.wikipedia.org/w/api.php' });
@@ -31,6 +31,30 @@ const formatDate = (dateStr: string) => {
     if (!dateStr) return 'Inconnue';
     return new Date(dateStr).toLocaleDateString('fr-FR');
 };
+
+const onBlock = async () => {
+    if (!userDetails.value) return;
+
+    const username = userDetails.value.name;
+    const expiry = prompt(`Durée du blocage pour ${username} (ex: 24 hours, infinite) :`, '24 hours');
+    if (!expiry) return;
+
+    const reason = prompt(`Motif du blocage pour ${username} :`, 'Vandalisme répété');
+    if (!reason) return;
+
+    try {
+        const result = await mwClient.block(username, expiry, reason);
+        if (result.block) {
+            addNotification(`Utilisateur ${username} bloqué pour ${expiry}`, 'success');
+            fetchUserInfo(); // Rafraîchir les infos pour voir le statut bloqué
+        } else if (result.error) {
+            addNotification(`Erreur de blocage : ${result.error.info}`, 'alert');
+        }
+    } catch (error) {
+        console.error('Block failed:', error);
+        addNotification('Échec de la requête de blocage.', 'alert');
+    }
+};
 </script>
 
 <template>
@@ -50,7 +74,7 @@ const formatDate = (dateStr: string) => {
         <div class="user-details">
           <p>📝 <strong>Contributions :</strong> {{ userDetails.editcount || 0 }}</p>
           <p>📅 <strong>Inscription :</strong> {{ formatDate(userDetails.registration) }}</p>
-          <p v-if="userDetails.blockedby" class="blocked-status">
+          <p v-if="userDetails.blockid" class="blocked-status">
             🚫 <strong>BLOQUÉ</strong> par {{ userDetails.blockedby }}
             <br><small>Motif : {{ userDetails.blockreason }}</small>
           </p>
@@ -59,7 +83,11 @@ const formatDate = (dateStr: string) => {
         <div class="user-actions">
           <a :href="`https://fr.wikipedia.org/wiki/Special:Contributions/${userDetails.name}`" target="_blank" class="action-btn">Contribs</a>
           <a :href="`https://fr.wikipedia.org/wiki/User_talk:${userDetails.name}`" target="_blank" class="action-btn">PDD</a>
-          <button class="block-btn" v-if="!userDetails.blockedby">Bloquer</button>
+          <template v-if="isIP(userDetails.name)">
+            <a :href="`https://whois.toolforge.org/gateway.py?lookup=true&ip=${userDetails.name}`" target="_blank" class="action-btn whois-btn">Whois</a>
+            <a :href="`https://www.ipqualityscore.com/free-ip-lookup-proxy-vpn-test/lookup/${userDetails.name}`" target="_blank" class="action-btn ipqs-btn">Proxy Check</a>
+          </template>
+          <button @click="onBlock" class="block-btn" v-if="!userDetails.blockid">Bloquer</button>
         </div>
       </div>
       <div v-else class="error">Impossible de charger les données de l'utilisateur.</div>
@@ -69,6 +97,24 @@ const formatDate = (dateStr: string) => {
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+// ... imports existants ...
+
+const isIP = (name: string): boolean => {
+    if (!name) return false;
+    const ipv4Regex = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
+    const ipv6Regex = /^(?:[A-F0-9]{1,4}:){7}[A-F0-9]{1,4}$/i;
+    return ipv4Regex.test(name) || ipv6Regex.test(name);
+};
+</script>
+
+<style scoped>
+/* ... styles existants ... */
+.whois-btn { background-color: #4a148c; }
+.ipqs-btn { background-color: #0d47a1; }
+.action-btn:hover { opacity: 0.8; }
+</style>
 
 <style scoped>
 .user-info-container {

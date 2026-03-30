@@ -112,6 +112,61 @@ export class MWClient {
         throw new Error(`Could not fetch info for user ${username}`);
     }
 
+    /**
+     * Récupère un jeton (token) pour une action spécifique (edit, block, etc.)
+     */
+    public async getToken(type: string = 'csrf'): Promise<string> {
+        const params = {
+            action: 'query',
+            meta: 'tokens',
+            type: type,
+            format: 'json',
+            origin: '*'
+        };
+
+        const result = await this.get(params);
+        if (result.query && result.query.tokens) {
+            return result.query.tokens[`${type}token`];
+        }
+        throw new Error(`Could not fetch ${type} token`);
+    }
+
+    /**
+     * Annule une modification (undo)
+     */
+    public async undo(title: string, undoRev: number, summary: string): Promise<any> {
+        const token = await this.getToken();
+        const params = {
+            action: 'edit',
+            title: title,
+            undo: undoRev,
+            summary: summary,
+            token: token,
+            format: 'json',
+            origin: '*'
+        };
+
+        return await this.post(params);
+    }
+
+    /**
+     * Bloque un utilisateur (Admins uniquement)
+     */
+    public async block(username: string, expiry: string, reason: string): Promise<any> {
+        const token = await this.getToken('csrf'); // MediaWiki utilise CSRF pour le blocage aussi
+        const params = {
+            action: 'block',
+            user: username,
+            expiry: expiry,
+            reason: reason,
+            token: token,
+            format: 'json',
+            origin: '*'
+        };
+
+        return await this.post(params);
+    }
+
     private getHeaders(): Record<string, string> {
         const headers: Record<string, string> = {
             'Api-User-Agent': 'LiveRCv2/0.1.0 (https://github.com/your-repo/livercv2)',

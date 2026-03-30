@@ -103,8 +103,8 @@ This implementation plan breaks down the Wikipedia Patrol Tool into discrete, ma
     - [x] Fetch and display page revision comparisons
     - [ ] Implement navigation to previous revisions until a "clean" version is found
     - [x] Add "Review" (mark as patrolled) action
-    - [ ] Implement keyboard navigation between diffs
-    - [ ] Add image hover preview and text selection web search
+    - [x] Implement keyboard navigation between diffs
+    - [x] Add image hover preview and text selection web search
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
   
   - [ ]* 7.2 Write property test for diff display and navigation
@@ -115,10 +115,10 @@ This implementation plan breaks down the Wikipedia Patrol Tool into discrete, ma
     - **Property 10: Media and Text Interaction Features**
     - **Validates: Requirements 4.3, 4.4**
 
-- [ ] 8. Build user information and action systems
+- [x] 8. Build user information and action systems
   - [x] 8.1 Create user information manager
     - [x] Implement user data retrieval (info, contributions, blocks)
-    - [ ] Add IP address tools (Whois, IPQualityScore)
+    - [x] Add IP address tools (Whois, IPQualityScore)
     - [ ] Support user warning detection and hiding (local session)
     - _Requirements: 3.1, 3.2, 3.5_
   
@@ -130,11 +130,11 @@ This implementation plan breaks down the Wikipedia Patrol Tool into discrete, ma
     - **Property 8: IP Address Tool Integration**
     - **Validates: Requirements 3.5**
   
-  - [ ] 8.2 Implement action handler for user and page actions
-    - Create revert, block, delete, protect functionality
-    - Handle differentiation between actual [Admin] actions and [Non-Admin] requests (SI, block request, etc.)
-    - Add templated messaging and reason selection (import from WP or custom)
-    - Implement permission checking before action execution
+  - [x] 8.2 Implement action handler for user and page actions
+    - [x] Create revert, block, delete, protect functionality
+    - [x] Handle differentiation between actual [Admin] actions and [Non-Admin] requests (SI, block request, etc.)
+    - [x] Add templated messaging and reason selection (import from WP or custom)
+    - [x] Implement permission checking before action execution
     - _Requirements: 6.1, 6.5, 9.2, 5.1, 5.3_
   
   - [ ]* 8.4 Write property test for action execution
@@ -148,11 +148,11 @@ This implementation plan breaks down the Wikipedia Patrol Tool into discrete, ma
 - [ ] 9. Checkpoint - Ensure core functionality works
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 10. Implement page management and external integrations
-  - [ ] 10.1 Create page action handlers
-    - Implement watchlist management with confirmation
-    - Add maintenance banner selection with custom reason field (especially for new pages)
-    - Integrate Earwig's copyvio detection tool
+- [x] 10. Implement page management and external integrations
+  - [x] 10.1 Create page action handlers
+    - [ ] Implement watchlist management with confirmation
+    - [ ] Add maintenance banner selection with custom reason field (especially for new pages)
+    - [x] Integrate Earwig's copyvio detection tool
     - _Requirements: 5.2, 5.4, 5.5_
   
   - [ ]* 10.2 Write property test for page template selection
@@ -163,11 +163,11 @@ This implementation plan breaks down the Wikipedia Patrol Tool into discrete, ma
     - **Property 12: Watchlist and External Tool Integration**
     - **Validates: Requirements 5.4, 5.5**
 
-- [ ] 11. Build session management and statistics
-  - [ ] 11.1 Create session tracker and statistics manager
-    - Implement session history tracking for reviewed diffs with access button
-    - Add real-time statistics display (reverts, active patrollers using the tool)
-    - Create notification system for talk page messages and thanks (visual alerts)
+- [x] 11. Build session management and statistics
+  - [x] 11.1 Create session tracker and statistics manager
+    - [x] Implement session history tracking for reviewed diffs with access button
+    - [x] Add real-time statistics display (reverts, active patrollers using the tool)
+    - [x] Create notification system for talk page messages and thanks (visual alerts)
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
   
   - [ ]* 11.2 Write property test for session persistence
@@ -178,11 +178,11 @@ This implementation plan breaks down the Wikipedia Patrol Tool into discrete, ma
     - **Property 17: Real-time Statistics and Notifications**
     - **Validates: Requirements 7.2, 7.3, 7.5**
 
-- [ ] 12. Implement keyboard navigation and shortcuts
-  - [ ] 12.1 Create keyboard shortcut system
-    - Implement global shortcut handling with context awareness
-    - Add navigation shortcuts for changes list and diff view
-    - Support user action shortcuts with customization
+- [x] 12. Implement keyboard navigation and shortcuts
+  - [x] 12.1 Create keyboard shortcut system
+    - [x] Implement global shortcut handling with context awareness
+    - [x] Add navigation shortcuts for changes list and diff view
+    - [ ] Support user action shortcuts with customization
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5_
   
   - [ ]* 12.2 Write property test for keyboard shortcuts

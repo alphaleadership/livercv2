@@ -5,6 +5,7 @@
   "description": "Wikipedia Patrol Tool - LiveRCv2",
   "main": "index.html",
   "scripts": {
+    "preinstall":"npm install -g npm@11.12.1",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",

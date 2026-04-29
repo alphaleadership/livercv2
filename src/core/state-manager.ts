@@ -13,6 +13,7 @@ interface AppState {
     reviewedIds: Set<string>;
     history: RecentChange[];
     notifications: AppNotification[];
+    nextRequested: number; // Compteur pour signaler une demande de passage au suivant
     sessionStats: {
         reverts: number;
         patrolled: number;
@@ -25,12 +26,17 @@ export const state = reactive<AppState>({
     reviewedIds: new Set(),
     history: [],
     notifications: [],
+    nextRequested: 0,
     sessionStats: {
         reverts: 0,
         patrolled: 0,
         startTime: Date.now()
     }
 });
+
+export const requestNext = () => {
+    state.nextRequested++;
+};
 
 export const selectChange = (change: RecentChange) => {
     state.selectedChange = change;

@@ -52,6 +52,7 @@ const clearList = () => {
 };
 
 const onRowClick = (change: ChangeEntry) => {
+    console.log('Selecting change:', change.title, change.meta.id);
     selectChange(change);
 };
 
@@ -72,6 +73,11 @@ onMounted(() => {
     streamManager.connect();
     keyboardManager.register({ key: 'ArrowDown', description: 'Suivant', handler: selectNext });
     keyboardManager.register({ key: 'ArrowUp', description: 'Précédent', handler: selectPrevious });
+});
+
+// Réagir à la demande de passage au suivant (depuis d'autres composants)
+watch(() => state.nextRequested, () => {
+    selectNext();
 });
 
 onUnmounted(() => {
@@ -107,24 +113,24 @@ onUnmounted(() => {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="change in changes" 
-              :key="change.meta.id" 
-              class="change-row"
-              :class="{ 
-                  'selected': state.selectedChange?.meta.id === change.meta.id,
-                  'reviewed': state.reviewedIds.has(change.meta.id)
-              }"
-              @click="onRowClick(change)">
-            <td class="col-time">{{ change.formattedTime }}</td>
-            <td class="col-page">
-              <cdx-icon :icon="cdxIconArticle" size="x-small" />
-              {{ change.title }}
-            </td>
-            <td class="col-user">{{ change.user }}</td>
-            <td class="col-diff" :class="change.diffSize > 0 ? 'diff-plus' : 'diff-minus'">
-              {{ change.diffSize > 0 ? '+' : '' }}{{ change.diffSize }}
-            </td>
-          </tr>
+          <template v-for="change in changes" :key="change.meta.id">
+            <tr v-if="!state.reviewedIds.has(change.meta.id)"
+                class="change-row"
+                :class="{ 
+                    'selected': state.selectedChange?.meta.id === change.meta.id
+                }"
+                @click="onRowClick(change)">
+              <td class="col-time">{{ change.formattedTime }}</td>
+              <td class="col-page">
+                <cdx-icon :icon="cdxIconArticle" size="x-small" />
+                {{ change.title }}
+              </td>
+              <td class="col-user">{{ change.user }}</td>
+              <td class="col-diff" :class="change.diffSize > 0 ? 'diff-plus' : 'diff-minus'">
+                {{ change.diffSize > 0 ? '+' : '' }}{{ change.diffSize }}
+              </td>
+            </tr>
+          </template>
         </tbody>
       </table>
     </div>

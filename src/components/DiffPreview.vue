@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
-import { state, markAsReviewed, addNotification, incrementReverts } from '@/core/state-manager';
+import { state, markAsReviewed, addNotification, incrementReverts, requestNext } from '@/core/state-manager';
 import { MWClient } from '@/api/mw-client';
 import { keyboardManager } from '@/core/keyboard-manager';
 import { CdxButton, CdxIcon, CdxProgressBar } from '@wikimedia/codex';
@@ -37,6 +37,7 @@ const onMarkAsReviewed = () => {
     if (state.selectedChange) {
         markAsReviewed(state.selectedChange.meta.id);
         addNotification('Marqué comme relu', 'success');
+        requestNext();
     }
 };
 
@@ -55,6 +56,7 @@ const onUndo = async () => {
             addNotification('Modification annulée !', 'success');
             incrementReverts();
             markAsReviewed(state.selectedChange.meta.id);
+            requestNext();
         } else {
             addNotification(`Erreur : ${result.error?.info || 'Inconnue'}`, 'alert');
         }

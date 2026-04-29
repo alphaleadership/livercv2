@@ -12,6 +12,11 @@ const elapsedTime = computed(() => {
 const clearNotifications = () => {
     state.notifications = [];
 };
+
+const openHistory = () => {
+    // @ts-ignore
+    window.livercOpenComponent('History', 'Historique');
+};
 </script>
 
 <template>
@@ -40,7 +45,7 @@ const clearNotifications = () => {
     </div>
 
     <div class="history-section">
-      <cdx-button size="small" weight="quiet">
+      <cdx-button size="small" weight="quiet" @click="openHistory">
         <template #icon><cdx-icon :icon="cdxIconHistory" /></template>
         Historique ({{ state.history.length }})
       </cdx-button>

@@ -14,7 +14,19 @@ const items = [
 
 const select = (id: string) => {
     selectedId.value = id;
-    // Ici on pourra ajouter la logique pour changer de vue si besoin
+    if (id === 'changes') {
+        // @ts-ignore
+        window.livercOpenComponent('ChangesList', 'Modifications');
+    } else if (id === 'users') {
+        // @ts-ignore
+        window.livercOpenComponent('UserInfo', 'Contributeur');
+    } else if (id === 'stats') {
+        // @ts-ignore
+        window.livercOpenComponent('StatusBar', 'Stats');
+    } else if (id === 'settings') {
+        // @ts-ignore
+        window.livercOpenComponent('Settings', 'Réglages');
+    }
 };
 </script>
 

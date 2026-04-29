@@ -1,4 +1,6 @@
 @import '@wikimedia/codex/dist/codex.style.css';
+@import 'golden-layout/dist/css/goldenlayout-base.css';
+@import 'golden-layout/dist/css/themes/goldenlayout-light-theme.css';
 
 /* Styles de base pour l'isolation */
 #liverc-v2-main-container {
@@ -35,3 +37,62 @@
 /* Utilitaires de texte */
 .diff-plus { color: #14866d; }
 .diff-minus { color: #d33; }
+
+/* Styles de la modale LiveRC v2 */
+.liverc-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.liverc-modal-container {
+    width: 95vw;
+    height: 90vh;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.liverc-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #a2a9b1;
+}
+
+.liverc-modal-header h2 {
+    margin: 0;
+    font-size: 1.2em;
+}
+
+.liverc-modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    line-height: 1;
+    color: #54595d;
+}
+
+.liverc-modal-close:hover {
+    color: #d33;
+}
+
+#liverc-v2-main-container {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+}

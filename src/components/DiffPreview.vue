@@ -50,18 +50,23 @@ const onUndo = async () => {
         const revId = state.selectedChange.revision.new || 0;
         const summary = `Annulation de la modification ${revId} par ${state.selectedChange.user} (via LiveRCv2)`;
         
+        console.log('Attempting undo for:', title, 'revision:', revId);
         const result = await mwClient.undo(title, revId, summary);
+        console.log('Undo result:', result);
         
-        if (result.edit && result.edit.result === 'Success') {
+        if (result && result.edit && result.edit.result === 'Success') {
             addNotification('Modification annulée !', 'success');
             incrementReverts();
             markAsReviewed(state.selectedChange.meta.id);
             requestNext();
         } else {
-            addNotification(`Erreur : ${result.error?.info || 'Inconnue'}`, 'alert');
+            const errorMsg = result?.error?.info || 'Erreur inconnue';
+            addNotification(`Erreur : ${errorMsg}`, 'alert');
+            console.error('Undo failed:', result);
         }
     } catch (e) {
-        addNotification('Échec de l\'action', 'alert');
+        console.error('Undo exception:', e);
+        addNotification('Échec de l\'action (exception)', 'alert');
     }
 };
 

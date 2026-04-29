@@ -20,6 +20,18 @@ export class MWClient {
 
     public async post(params: Record<string, any>): Promise<any> {
         if (!this.api) throw new Error('Action POST impossible hors MediaWiki');
+        
+        // S'assurer qu'on a un jeton pour les actions de modification
+        if (!params.token) {
+            try {
+                params.token = await this.api.getEditToken();
+            } catch (e) {
+                // Fallback pour les anciennes versions ou configurations spécifiques
+                const tokenRes = await this.api.get({ action: 'query', meta: 'tokens' });
+                params.token = tokenRes.query?.tokens?.csrftoken;
+            }
+        }
+        
         return await this.api.post(params);
     }
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue';
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue';
 import { EventStreamManager } from '@/core/event-stream-manager';
 import { FilterManager } from '@/core/filter-manager';
 import { RecentChange } from '@/types/mediawiki-events';
@@ -15,6 +15,12 @@ interface ChangeEntry extends RecentChange {
 }
 
 const changes = ref<ChangeEntry[]>([]);
+
+// Liste filtrée des modifications non encore traitées (la file d'attente)
+const queue = computed(() => {
+    return changes.value.filter(c => !state.reviewedIds.has(c.meta.id));
+});
+
 const isPaused = ref(false);
 const streamManager = new EventStreamManager(['frwiki']);
 
@@ -57,15 +63,25 @@ const onRowClick = (change: ChangeEntry) => {
 };
 
 const selectNext = () => {
-    if (changes.value.length === 0) return;
-    const currentIndex = state.selectedChange ? changes.value.findIndex(c => c.meta.id === state.selectedChange?.meta.id) : -1;
-    if (currentIndex < changes.value.length - 1) selectChange(changes.value[currentIndex + 1]);
+    if (queue.value.length === 0) return;
+    
+    // Si rien n'est sélectionné ou si la sélection actuelle est hors queue
+    const currentIndex = state.selectedChange ? queue.value.findIndex(c => c.meta.id === state.selectedChange?.meta.id) : -1;
+    
+    if (currentIndex < queue.value.length - 1) {
+        selectChange(queue.value[currentIndex + 1]);
+    } else {
+        // Optionnel : boucler ou prendre le premier si on était sur le dernier
+        selectChange(queue.value[0]);
+    }
 };
 
 const selectPrevious = () => {
-    if (!state.selectedChange || changes.value.length === 0) return;
-    const currentIndex = changes.value.findIndex(c => c.meta.id === state.selectedChange?.meta.id);
-    if (currentIndex > 0) selectChange(changes.value[currentIndex - 1]);
+    if (queue.value.length === 0) return;
+    const currentIndex = state.selectedChange ? queue.value.findIndex(c => c.meta.id === state.selectedChange?.meta.id) : -1;
+    if (currentIndex > 0) {
+        selectChange(queue.value[currentIndex - 1]);
+    }
 };
 
 onMounted(() => {
@@ -113,24 +129,23 @@ onUnmounted(() => {
           </tr>
         </thead>
         <tbody>
-          <template v-for="change in changes" :key="change.meta.id">
-            <tr v-if="!state.reviewedIds.has(change.meta.id)"
-                class="change-row"
-                :class="{ 
-                    'selected': state.selectedChange?.meta.id === change.meta.id
-                }"
-                @click="onRowClick(change)">
-              <td class="col-time">{{ change.formattedTime }}</td>
-              <td class="col-page">
-                <cdx-icon :icon="cdxIconArticle" size="x-small" />
-                {{ change.title }}
-              </td>
-              <td class="col-user">{{ change.user }}</td>
-              <td class="col-diff" :class="change.diffSize > 0 ? 'diff-plus' : 'diff-minus'">
-                {{ change.diffSize > 0 ? '+' : '' }}{{ change.diffSize }}
-              </td>
-            </tr>
-          </template>
+          <tr v-for="change in queue" 
+              :key="change.meta.id" 
+              class="change-row"
+              :class="{ 
+                  'selected': state.selectedChange?.meta.id === change.meta.id
+              }"
+              @click="onRowClick(change)">
+            <td class="col-time">{{ change.formattedTime }}</td>
+            <td class="col-page">
+              <cdx-icon :icon="cdxIconArticle" size="x-small" />
+              {{ change.title }}
+            </td>
+            <td class="col-user">{{ change.user }}</td>
+            <td class="col-diff" :class="change.diffSize > 0 ? 'diff-plus' : 'diff-minus'">
+              {{ change.diffSize > 0 ? '+' : '' }}{{ change.diffSize }}
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>

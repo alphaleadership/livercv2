@@ -131,19 +131,45 @@ const startLiveRC = () => {
     // Gestionnaire global pour ouvrir des composants depuis les vues Vue
     // @ts-ignore
     window.livercOpenComponent = (componentType: string, title: string) => {
-        // Chercher si le composant est déjà ouvert
-        const allComponents = layout.getAllComponents();
-        const existing = allComponents.find(c => c.componentType === componentType);
+        if (!layout.rootItem) return;
+
+        // Recherche récursive simplifiée d'un composant par son type
+        const findComponent = (item: any): any => {
+            if (item.isComponent && item.componentType === componentType) return item;
+            if (item.contentItems) {
+                for (const child of item.contentItems) {
+                    const found = findComponent(child);
+                    if (found) return found;
+                }
+            }
+            return null;
+        };
+
+        const existing = findComponent(layout.rootItem);
         
         if (existing) {
             existing.parentItem.setActiveComponentItem(existing);
         } else {
-            // Ajouter au stack central (le 3ème enfant de la rangée principale dans notre config)
+            // Ajouter au stack central
             try {
                 // @ts-ignore
-                const mainRow = layout.rootItem.contentItems[0].contentItems[0];
-                const targetStack = mainRow.contentItems[2];
-                targetStack.addComponent(componentType, undefined, title);
+                const root = layout.rootItem;
+                // Dans notre config, on cherche le premier stack disponible pour accueillir le nouveau composant
+                const findFirstStack = (item: any): any => {
+                    if (item.isStack) return item;
+                    if (item.contentItems) {
+                        for (const child of item.contentItems) {
+                            const found = findFirstStack(child);
+                            if (found) return found;
+                        }
+                    }
+                    return null;
+                };
+
+                const targetStack = findFirstStack(root);
+                if (targetStack) {
+                    targetStack.addComponent(componentType, undefined, title);
+                }
             } catch (e) {
                 console.error("Impossible d'ajouter le composant au layout", e);
             }

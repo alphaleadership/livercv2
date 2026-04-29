@@ -138,8 +138,13 @@ onUnmounted(() => {
               @click="onRowClick(change)">
             <td class="col-time">{{ change.formattedTime }}</td>
             <td class="col-page">
-              <cdx-icon :icon="cdxIconArticle" size="x-small" />
-              {{ change.title }}
+              <div class="page-title-line">
+                <cdx-icon :icon="cdxIconArticle" size="x-small" />
+                {{ change.title }}
+              </div>
+              <div v-if="change.comment" class="change-comment" :title="change.comment">
+                {{ change.comment }}
+              </div>
             </td>
             <td class="col-user">{{ change.user }}</td>
             <td class="col-diff" :class="change.diffSize > 0 ? 'diff-plus' : 'diff-minus'">
@@ -222,7 +227,26 @@ td {
 }
 
 .col-time { width: 80px; color: #72777d; }
-.col-page { color: #36c; font-weight: bold; }
+.col-page { color: #36c; font-weight: bold; min-width: 200px; }
+
+.page-title-line {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.change-comment {
+  font-size: 0.8em;
+  font-weight: normal;
+  color: #54595d;
+  font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 300px;
+}
+
 .col-user { width: 120px; }
 .col-diff { width: 60px; font-weight: bold; text-align: right; }
 

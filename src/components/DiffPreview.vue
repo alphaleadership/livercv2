@@ -82,6 +82,7 @@ const onTextSelect = () => {
 onMounted(() => {
     keyboardManager.register({ key: 'r', description: 'Relu', handler: onMarkAsReviewed });
     keyboardManager.register({ key: 'u', description: 'Annuler', handler: onUndo });
+    keyboardManager.register({ key: ' ', description: 'Relu', handler: onMarkAsReviewed });
 });
 </script>
 
@@ -90,8 +91,13 @@ onMounted(() => {
     <div v-if="state.selectedChange" class="diff-content">
       <div class="diff-toolbar">
         <div class="page-info">
-          <strong>{{ state.selectedChange.title }}</strong>
-          <span class="user-info">par {{ state.selectedChange.user }}</span>
+          <div>
+            <strong>{{ state.selectedChange.title }}</strong>
+            <span class="user-info">par {{ state.selectedChange.user }}</span>
+          </div>
+          <div v-if="state.selectedChange.comment" class="comment-info">
+            <span class="comment-text">« {{ state.selectedChange.comment }} »</span>
+          </div>
         </div>
         <div class="actions-group">
           <cdx-button action="progressive" weight="primary" size="small" @click="onMarkAsReviewed">
@@ -152,6 +158,16 @@ onMounted(() => {
   margin-left: 12px;
   color: #72777d;
   font-size: 0.9em;
+}
+
+.comment-info {
+  font-size: 0.85em;
+  color: #54595d;
+  font-style: italic;
+  max-width: 500px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .actions-group {

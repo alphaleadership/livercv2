@@ -1,11 +1,11 @@
 {
   "name": "livercv2",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "description": "Wikipedia Patrol Tool - LiveRCv2",
   "main": "index.html",
   "scripts": {
-    "preinstall":"npm install -g npm@11.12.1",
+    "preinstall": "npm install -g npm@11.12.1",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",

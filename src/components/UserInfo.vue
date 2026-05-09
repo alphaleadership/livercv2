@@ -3,11 +3,26 @@ import { ref, watch } from 'vue';
 import { state, addNotification } from '@/core/state-manager';
 import { MWClient } from '@/api/mw-client';
 import { CdxButton, CdxIcon, CdxThumbnail } from '@wikimedia/codex';
-import { cdxIconUserGroup, cdxIconEdit, cdxIconCalendar, cdxIconBlock, cdxIconInfo } from '@wikimedia/codex-icons';
+import { cdxIconUserGroup, cdxIconEdit, cdxIconCalendar, cdxIconBlock, cdxIconInfo, cdxIconFlag } from '@wikimedia/codex-icons';
 
 const mwClient = new MWClient();
 const userDetails = ref<any>(null);
 const isLoading = ref(false);
+const selectedReason = ref('Vandalisme manifeste');
+const customMessage = ref('');
+
+const reportReasons = [
+    'Vandalisme manifeste',
+    'Vandalisme persistant après avertissement',
+    'Compte créé uniquement pour vandaliser',
+    'Insertion de faux ou de canulars',
+    'Suppression massive de contenu',
+    'Spam / Publicité',
+    'Violation de copyright',
+    'Attaques personnelles / Insultes',
+    'Nom d\'utilisateur non conforme',
+    'Test de débutant persistant'
+];
 
 const fetchUserInfo = async () => {
     if (!state.selectedChange) return;
@@ -59,6 +74,38 @@ const onBlock = async () => {
         addNotification('Erreur lors du blocage', 'alert');
     }
 };
+
+const onReport = async () => {
+    if (!userDetails.value || !selectedReason.value || !state.selectedChange) {
+        return;
+    }
+    
+    const username = userDetails.value.name;
+    if (!username) return; // Assertion 2
+
+    // Combiner la raison sélectionnée avec le message personnalisé si présent
+    const fullReason = customMessage.value 
+        ? `${selectedReason.value} : ${customMessage.value}`
+        : selectedReason.value;
+
+    // Construction automatique du lien de diff
+    let diffUrl = '';
+    const change = state.selectedChange;
+    if (change.revision && change.revision.new) {
+        diffUrl = `${change.server_url}/w/index.php?diff=${change.revision.new}`;
+        if (change.revision.old) {
+            diffUrl += `&oldid=${change.revision.old}`;
+        }
+    }
+
+    try {
+        await mwClient.reportToVEC(username, fullReason, diffUrl);
+        addNotification(`Utilisateur ${username} signalé sur VEC`, 'success');
+        customMessage.value = ''; // Reset après succès
+    } catch (e) {
+        addNotification('Erreur lors du signalement', 'alert');
+    }
+};
 </script>
 
 <template>
@@ -93,6 +140,27 @@ const onBlock = async () => {
           </div>
         </div>
         
+        <div class="report-section">
+          <h4>Signaler cet utilisateur (VEC)</h4>
+          <div class="report-controls">
+            <select v-model="selectedReason" class="reason-select">
+              <option v-for="reason in reportReasons" :key="reason" :value="reason">
+                {{ reason }}
+              </option>
+            </select>
+            <textarea 
+              v-model="customMessage" 
+              placeholder="Message personnalisé (optionnel)..." 
+              class="custom-message-input"
+              rows="2"
+            ></textarea>
+            <cdx-button action="destructive" weight="primary" @click="onReport">
+              <template #icon><cdx-icon :icon="cdxIconFlag" /></template>
+              Envoyer le signalement
+            </cdx-button>
+          </div>
+        </div>
+        
         <div class="user-actions">
           <cdx-button action="progressive" weight="quiet" 
             :href="`https://fr.wikipedia.org/wiki/Special:Contributions/${userDetails.name}`" target="_blank">
@@ -107,7 +175,7 @@ const onBlock = async () => {
             <cdx-button weight="quiet" :href="`https://whois.toolforge.org/gateway.py?lookup=true&ip=${userDetails.name}`" target="_blank">Whois</cdx-button>
           </template>
           
-          <cdx-button action="destructive" weight="primary" v-if="!userDetails.blockid" @click="onBlock">
+          <cdx-button action="destructive" weight="quiet" v-if="!userDetails.blockid" @click="onBlock">
             <template #icon><cdx-icon :icon="cdxIconBlock" /></template>
             Bloquer
           </cdx-button>
@@ -126,6 +194,7 @@ const onBlock = async () => {
   padding: 16px;
   color: #202122;
   background: white;
+  overflow-y: auto;
 }
 
 .user-header h3 {
@@ -173,6 +242,39 @@ const onBlock = async () => {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.report-section {
+  margin-bottom: 24px;
+  padding: 12px;
+  border: 1px solid #eaecf0;
+  border-radius: 2px;
+  background: #f8f9fa;
+}
+
+.report-section h4 {
+  margin: 0 0 12px 0;
+  font-size: 0.9em;
+  color: #54595d;
+}
+
+.report-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reason-select, .custom-message-input {
+  padding: 8px;
+  border: 1px solid #a2a9b1;
+  border-radius: 2px;
+  background: white;
+  font-family: inherit;
+  font-size: 0.9em;
+}
+
+.custom-message-input {
+  resize: vertical;
 }
 
 .user-actions {

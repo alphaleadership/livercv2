@@ -73,4 +73,42 @@ export class MWClient {
             reason: reason
         });
     }
+
+    /**
+     * Signale un utilisateur sur Wikipédia:Vandalisme en cours (VEC)
+     * @param username Nom de l'utilisateur à signaler
+     * @param reason Motif du signalement
+     * @param diffUrl Lien vers le diff (optionnel)
+     */
+    public async reportToVEC(username: string, reason: string, diffUrl?: string): Promise<any> {
+        if (!username || !reason) {
+            throw new Error('Username and reason are required for reporting');
+        }
+        
+        const pageTitle = 'Wikipédia:Vandalisme en cours';
+        let text = `\n\n==Demande de blocage de ${username}==\n\n` +
+                     `<!-- Remplacez « XXXX » par le compte temporaire ou le nom du contributeur auteur du vandalisme, ainsi que les « … » par les informations adéquates -->\n` +
+                     `* Auteur du vandalisme : {{u+|${username}}}\n` +
+                     `* Type de dégâts : ${reason}\n`;
+        
+        if (diffUrl) {
+            text += `* Différence : ${diffUrl}\n`;
+        }
+        
+        text += `\n<!-- Merci de ne pas modifier la ligne ci-dessous -->\n` +
+                `Message déposé par --~~~~`;
+        
+        const result = await this.post({
+            action: 'edit',
+            title: pageTitle,
+            appendtext: text,
+            summary: `Signalement de [[Special:Contributions/${username}|${username}]] (${reason})`
+        });
+        
+        if (!result || result.error) {
+            throw new Error(result?.error?.info || 'Failed to report to VEC');
+        }
+        
+        return result;
+    }
 }
